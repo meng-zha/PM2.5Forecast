@@ -10,7 +10,8 @@ from torch.utils.data import DataLoader
 from dataloader import AirDataset
 from model import Encoder,AttnDecoder
 
-[mean,var] = [3.652727377067978,1.0758863206940295]
+# [mean,var] = [3.652727377067978,1.0758863206940295]
+[mean,var] = [0.,1.]
 
 def evaluate(encoder,decoder,mode):
     encoder.eval()

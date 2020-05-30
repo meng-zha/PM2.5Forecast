@@ -81,7 +81,7 @@ def train():
             weight = torch.clamp(real,0,500)/500.
             weight = 2-(1-weight**2)**0.5
 
-            loss = criterion(weight*output,weight*label)
+            loss = criterion(output,label)
             loss.backward()
 
             optimizer_encoder.step()
@@ -90,8 +90,10 @@ def train():
             print(f'epoch:{epoch} iter:{i}/{len(train_dataloader)} loss:{loss.cpu()}')
 
         writer.add_histogram(f'real/hist_{epoch}',real.view(-1),epoch)
-        writer.add_histogram(f'predict/hist_{epoch}',predict.view(-1),epoch)
-        writer.add_histogram(f'error/hist_{epoch}',(real-predict).view(-1),epoch)
+        writer.add_histogram(f'real/hist_{epoch}',predict.view(-1),epoch)
+
+        writer.add_histogram(f'norm/hist_{epoch}',label.view(-1),epoch)
+        writer.add_histogram(f'norm/hist_{epoch}',output.view(-1),epoch)
 
         err,acc = evaluate(encoder_model,decoder_model,'val')
         print(f'epoch:{epoch} error:{err.mean()},acc:{acc.mean()}')

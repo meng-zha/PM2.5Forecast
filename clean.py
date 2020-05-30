@@ -90,16 +90,15 @@ class Cleaner(object):
                 feature_test[~np.isnan(feature_test)] = np.log(
                     feature_test[~np.isnan(feature_test)] + 1)
 
-                import pdb; pdb.set_trace()
                 # norm[0,1]
                 mean = feature[~np.isnan(feature)].mean()
                 mean_list.append(mean)
                 var = feature[~np.isnan(feature)].std()
                 var_list.append(var)
-                feature[~np.isnan(feature)] = (feature[~np.isnan(feature)] -
-                                               mean) / var
-                feature_test[~np.isnan(feature_test)] = (
-                    feature_test[~np.isnan(feature_test)] - mean) / var
+                # feature[~np.isnan(feature)] = (feature[~np.isnan(feature)] -
+                #                                mean) / var
+                # feature_test[~np.isnan(feature_test)] = (
+                #     feature_test[~np.isnan(feature_test)] - mean) / var
 
                 self.trainval[..., i] = feature
                 self.test[..., i] = feature_test
@@ -132,7 +131,9 @@ class Cleaner(object):
         index = np.where(np.isnan(features))
 
         # init the nan using the 0 mean value
-        features[np.isnan(features)] = 0
+        # features[np.isnan(features)] = 0
+        for i in range(1,features.shape[2]):
+            features[...,i][np.isnan(features[...,i])] = mean_list[i-1]
 
         for i, ob, feat in (zip(*index)):
             prev = i - 10
