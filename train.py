@@ -78,10 +78,13 @@ def train():
             predict = output*var+mean
             predict = torch.exp(predict)-1
 
+            # weight = torch.ones_like(real)
+            # weight[(real>=115)*(real<500)] += 1
             weight = torch.clamp(real,0,500)/500.
             weight = 2-(1-weight**2)**0.5
 
             loss = criterion(weight*output,weight*label)
+            # loss = criterion(weight*predict,weight*real)
             loss.backward()
 
             optimizer_encoder.step()
@@ -90,21 +93,24 @@ def train():
             print(f'epoch:{epoch} iter:{i}/{len(train_dataloader)} loss:{loss.cpu()}')
 
         writer.add_histogram(f'real/hist_{epoch}',real.view(-1),epoch)
-        writer.add_histogram(f'predict/hist_{epoch}',predict.view(-1),epoch)
-        writer.add_histogram(f'error/hist_{epoch}',(real-predict).view(-1),epoch)
+        writer.add_histogram(f'real/hist_{epoch}',predict.view(-1),epoch)
+        writer.add_histogram(f'norm/hist_{epoch}',label.view(-1),epoch)
+        writer.add_histogram(f'norm/hist_{epoch}',output.view(-1),epoch)
 
         err,acc = evaluate(encoder_model,decoder_model,'val')
-        print(f'epoch:{epoch} error:{err.mean()},acc:{acc.mean()}')
-        for j,spot in enumerate(spots):
-            writer.add_scalar(f'{spot}/err',err.mean(0)[j],epoch)
-            writer.add_scalar(f'{spot}/acc',acc.mean(0)[j],epoch)
-
         for j in range(6):
             writer.add_scalar(f'{j}-hour/err',err.mean(1)[j])
             writer.add_scalar(f'{j}-hour/acc',acc.mean(1)[j])
-
         writer.add_scalar(f'00-avg/err',err.mean())
         writer.add_scalar(f'00-avg/acc',acc.mean())
+
+        err,acc = evaluate(encoder_model,decoder_model,'test')
+        for j in range(6):
+            writer.add_scalar(f'{j}-hour/testerr',err.mean(1)[j])
+            writer.add_scalar(f'{j}-hour/testacc',acc.mean(1)[j])
+
+        writer.add_scalar(f'00-avg/testerr',err.mean())
+        writer.add_scalar(f'00-avg/testacc',acc.mean())
 
         torch.save(encoder_model.state_dict(),os.path.join(check,f'encoder_{epoch}.pth'))
         torch.save(decoder_model.state_dict(),os.path.join(check,f'decoder_{epoch}.pth'))

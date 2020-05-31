@@ -20,12 +20,11 @@ class Encoder(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         for i in range(point_size[0]):
             self.fc.append(
-                nn.Sequential(nn.Linear(point_size[1], 16), nn.Dropout(0.2),
-                              nn.ReLU(True), nn.Linear(16, 8), nn.Dropout(0.2),
-                              nn.ReLU(True), nn.Linear(8, 4), nn.Dropout(0.2),
+                nn.Sequential(nn.Linear(point_size[1], 16), nn.Dropout(0.5),
+                              nn.ReLU(True), nn.Linear(16, 8), nn.Dropout(0.5),
                               nn.ReLU(True)))
         self.fc = nn.ModuleList(self.fc)
-        self.linear = nn.Linear(point_size[0] * 4, hidden_size)
+        self.linear = nn.Linear(point_size[0] * 8, hidden_size)
         self.gru = nn.GRU(hidden_size, hidden_size, batch_first=True)
 
     def forward(self, input):
@@ -34,7 +33,7 @@ class Encoder(nn.Module):
         output = torch.zeros(batch_size,
                              seq_length,
                              self.point_size[0],
-                             4,
+                             8,
                              device=self.device)
         for i in range(input.shape[1]):
             for j in range(self.point_size[0]):
@@ -60,7 +59,7 @@ class AttnDecoder(nn.Module):
 
         self.relu = nn.ReLU(inplace=True)
         self.fc = nn.Sequential(nn.Linear(hidden_size, hidden_size//2),
-                                nn.Dropout(0.2), nn.ReLU(True),
+                                nn.Dropout(0.5), nn.ReLU(True),
                                 nn.Linear(hidden_size//2, point_size[0]))
         self.gru = nn.GRU(hidden_size, hidden_size, batch_first=True)
         
