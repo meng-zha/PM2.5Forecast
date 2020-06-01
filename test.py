@@ -20,6 +20,9 @@ def evaluate(encoder,decoder,mode):
 
     loss = torch.zeros(6,35,device='cuda:0')
     acc = torch.zeros(6,35,device='cuda:0')
+    
+    mutation = 0.
+    mutation_acc = torch.zeros(6,35,device='cuda:0')
     for i, data in enumerate(val_dataloader, 0):
         with torch.no_grad():
             input, label = data
@@ -35,10 +38,19 @@ def evaluate(encoder,decoder,mode):
             predict = torch.exp(predict)-1
             loss += (torch.abs(real-predict)).sum(0)
 
+            # mutation
+            past = input[:,18:,5]*var+mean
+            past = torch.exp(past)-1
+            minus = past.reshape(input.shape[0],-1).mean(1) - real.reshape(input.shape[0],-1).mean(1)
+            minus = torch.abs(minus)
+            outbreak = torch.where(minus>200)
+
             real=numer2aqi(real)
             predict=numer2aqi(predict)
             acc += (real==predict).sum(0)
-    return loss/len(val_dataset),acc/len(val_dataset)
+            mutation_acc += (real[outbreak]==predict[outbreak]).sum(0)
+            mutation += outbreak[0].shape[0]
+    return loss/len(val_dataset),acc/len(val_dataset),mutation_acc/mutation
 
 def numer2aqi(data):
     data[data<=35] = 0
@@ -71,9 +83,9 @@ def main():
     encoder_model.load_state_dict(torch.load(encoder_path))
     decoder_model.load_state_dict(torch.load(decoder_path))
 
-    err,acc = evaluate(encoder_model,decoder_model,args.mode)
-    print(err.mean(1),acc.mean(1))
-    print(err.mean(),acc.mean())
+    err,acc,mutation = evaluate(encoder_model,decoder_model,args.mode)
+    print(err.mean(1),acc.mean(1),mutation.mean(1))
+    print(err.mean(),acc.mean(),mutation.mean())
 
 if __name__ == "__main__":
     main()

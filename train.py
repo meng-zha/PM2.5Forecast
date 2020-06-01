@@ -20,7 +20,7 @@ from test import evaluate,mean,var
 def parse_args():
     parser = argparse.ArgumentParser(description='PM2.5 prediction')
     parser.add_argument("--name",default='',type=str)
-    parser.add_argument("--epochs",default=100,type=float)
+    parser.add_argument("--epochs",default=100,type=int)
     parser.add_argument("--lr",default=1e-3,type=float)
     parser.add_argument("--batch",default=256,type=int)
     parser.add_argument("--hidden",default=8,type=int)
@@ -44,7 +44,6 @@ def train():
 
     train_dataset = AirDataset('./air_quality',mode='train')
     train_dataloader = DataLoader(train_dataset,batch_size=args.batch,shuffle=True,num_workers=8)
-    # [mean,var] = [3.6336625600012824,1.1400852379547814]
 
     encoder_model = Encoder(35*args.hidden,(35,7),device).cuda()
     decoder_model = AttnDecoder(35*args.hidden,(35,7),24,6,device).cuda()
@@ -97,14 +96,14 @@ def train():
         writer.add_histogram(f'norm/hist_{epoch}',label.view(-1),epoch)
         writer.add_histogram(f'norm/hist_{epoch}',output.view(-1),epoch)
 
-        err,acc = evaluate(encoder_model,decoder_model,'val')
+        err,acc,_ = evaluate(encoder_model,decoder_model,'val')
         for j in range(6):
             writer.add_scalar(f'{j}-hour/err',err.mean(1)[j])
             writer.add_scalar(f'{j}-hour/acc',acc.mean(1)[j])
         writer.add_scalar(f'00-avg/err',err.mean())
         writer.add_scalar(f'00-avg/acc',acc.mean())
 
-        err,acc = evaluate(encoder_model,decoder_model,'test')
+        err,acc,_ = evaluate(encoder_model,decoder_model,'test')
         for j in range(6):
             writer.add_scalar(f'{j}-hour/testerr',err.mean(1)[j])
             writer.add_scalar(f'{j}-hour/testacc',acc.mean(1)[j])
