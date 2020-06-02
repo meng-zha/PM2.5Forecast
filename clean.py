@@ -90,7 +90,6 @@ class Cleaner(object):
                 feature_test[~np.isnan(feature_test)] = np.log(
                     feature_test[~np.isnan(feature_test)] + 1)
 
-                import pdb; pdb.set_trace()
                 # norm[0,1]
                 mean = feature[~np.isnan(feature)].mean()
                 mean_list.append(mean)
@@ -212,17 +211,17 @@ class Cleaner(object):
 
         with h5py.File(os.path.join(self.root_path, 'train_dataset.h5'),
                        'w') as f:
-            # 33451,24,35,7
+            # 32032,24,35,7
             f.create_dataset('input', data=train_data['data'])
             f.create_dataset('label', data=train_data['label'])
         with h5py.File(os.path.join(self.root_path, 'val_dataset.h5'),
                        'w') as f:
-            # 8178,24,35,7
+            # 7850,24,35,7
             f.create_dataset('input', data=val_data['data'])
             f.create_dataset('label', data=val_data['label'])
         with h5py.File(os.path.join(self.root_path, 'test_dataset.h5'),
                        'w') as f:
-            # 5678,24,35,7
+            # 5315,24,35,7
             f.create_dataset('input', data=test_data['data'])
             f.create_dataset('label', data=test_data['label'])
 

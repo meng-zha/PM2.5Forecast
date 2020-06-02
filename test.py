@@ -66,7 +66,7 @@ def parse_args():
     parser.add_argument("--mode",default='val',type=str)
     parser.add_argument("--checkpoints_path",default='./checkpoints',type=str)
     parser.add_argument("--model",default=10,type=int)
-    parser.add_argument("--hidden",default=8,type=int)
+    parser.add_argument("--hidden",default=16,type=int)
 
     return parser.parse_args()
 

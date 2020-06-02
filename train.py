@@ -1,4 +1,3 @@
-
 '''
 author: meng-zha
 data: 2020/05/28
@@ -23,7 +22,7 @@ def parse_args():
     parser.add_argument("--epochs",default=100,type=int)
     parser.add_argument("--lr",default=1e-3,type=float)
     parser.add_argument("--batch",default=256,type=int)
-    parser.add_argument("--hidden",default=8,type=int)
+    parser.add_argument("--hidden",default=16,type=int)
 
     return parser.parse_args()
 
@@ -71,6 +70,7 @@ def train():
 
             optimizer_encoder.zero_grad()
             optimizer_decoder.zero_grad()
+            loss = criterion(output,label)
 
             real = label*var+mean
             real = torch.exp(real)-1
@@ -82,7 +82,6 @@ def train():
             weight = torch.clamp(real,0,500)/500.
             weight = 2-(1-weight**2)**0.5
 
-            loss = criterion(weight*output,weight*label)
             # loss = criterion(weight*predict,weight*real)
             loss.backward()
 

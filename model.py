@@ -59,7 +59,7 @@ class AttnDecoder(nn.Module):
 
         self.relu = nn.ReLU(inplace=True)
         self.fc = nn.Sequential(nn.Linear(hidden_size, hidden_size//2),
-                                nn.Dropout(0.5), nn.ReLU(True),
+                                 nn.ReLU(True),
                                 nn.Linear(hidden_size//2, point_size[0]))
         self.gru = nn.GRU(hidden_size, hidden_size, batch_first=True)
         
